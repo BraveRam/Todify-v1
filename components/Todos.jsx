@@ -94,8 +94,6 @@ export default function TodoPage() {
   };
 
   if (status === "loading") return <Loading />;
-  if (status === "unauthenticated") return <p>Please sign in to view your todos.</p>;
-
   return (
     <section className="max-w-3xl mx-auto py-16 px-6">
       <div className="flex gap-4 mb-8">

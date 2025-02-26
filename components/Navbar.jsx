@@ -12,6 +12,7 @@ import { MdOutlineAddTask } from "react-icons/md";
 import { ModeToggle } from "./features/ModeToggle"
 import { useSession, signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"
 
 const Navbar = () => {
   const router = useRouter();
@@ -27,12 +28,12 @@ const Navbar = () => {
   if (status === "authenticated") {
     return (
       <div className="flex items-center justify-between mt-2 w-[98%] mx-auto border-2 rounded">
-        <div className="flex items-center">
+        <Link href="/dashboard" className="flex items-center">
           <MdOutlineAddTask className="text-4xl" />
           {
             session?.user?.name && <h1 className="ml-4 text-2xl font-extrabold">{session.user.name.split(" ")[0]}</h1>
           }
-        </div>
+        </Link>
         <Menubar>
           <ModeToggle />
           <MenubarMenu>
