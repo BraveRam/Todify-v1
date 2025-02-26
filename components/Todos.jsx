@@ -1,188 +1,3 @@
-// "use client";
-// import Loading from "./Loading";
-// import { useState, useEffect } from "react";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Checkbox } from "@/components/ui/checkbox";
-// import Link from "next/link";
-// import axios from "axios";
-// import { useSession } from "next-auth/react";
-// import {
-//   AlertDialog,
-//   AlertDialogTrigger,
-//   AlertDialogContent,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-// } from "@/components/ui/alert-dialog";
-// import { getSession } from "next-auth/react";
-// 
-// export default function TodoPage() {
-//   const { data } = useSession();
-//   const session = await getSession()
-//   const [todos, setTodos] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [open, setOpen] = useState(false);
-//   const [editTodo, setEditTodo] = useState(null);
-//   const [formData, setFormData] = useState({ todoName: "", description: "" });
-// 
-//   useEffect(() => {
-//     async function getTodos() {
-//       if (!data?.user?.email || !session) return;
-//       try {
-//         setLoading(true);
-//         const response = await axios.post("/api/todos/fetch", {
-//           email: data.user.email,
-//         }, {
-//           headers: {
-//         Authorization: `Bearer ${session.jwt}`, // Secure authentication
-//         "Content-Type": "application/json",
-//       }
-//         }
-//       );
-//         setTodos(response.data);
-//       } catch (error) {
-//         console.error("Error fetching todos:", error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-//     getTodos();
-//   }, [data]);
-// 
-//   const handleCheckboxChange = async (todoId, completed) => {
-//     try {
-//       await axios.post("/api/todos/edit/complete", { todoId, completed });
-//       setTodos((prevTodos) =>
-//         prevTodos.map((todo) => (todo._id === todoId ? { ...todo, completed } : todo))
-//       );
-//     } catch (error) {
-//       console.error("Error updating todo:", error);
-//     }
-//   };
-// 
-//   const handleDelete = async (todoId) => {
-//     try {
-//       await axios.post("/api/todos/delete", { todoId });
-//       setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== todoId));
-//     } catch (error) {
-//       console.error("Error deleting todo:", error);
-//     }
-//   };
-// 
-//   const handleEditClick = (todo) => {
-//     setEditTodo(todo);
-//     setFormData({ todoName: todo.todoName, description: todo.description });
-//     setOpen(true);
-//   };
-// 
-//   const handleSubmitEdit = async () => {
-//     if(formData.todoName.trim() && formData.description.trim()){
-//       if (editTodo) {
-//         try {
-//           await axios.post("/api/todos/edit/todo", {
-//             todoId: editTodo._id,
-//             todoName: formData.todoName,
-//             description: formData.description,
-//           });
-//   
-//           setTodos((prevTodos) =>
-//             prevTodos.map((todo) =>
-//               todo._id === editTodo._id
-//                 ? { ...todo, todoName: formData.todoName, description: formData.description }
-//                 : todo
-//             )
-//           );
-//           setOpen(false);
-//         } catch (error) {
-//           console.error("Error editing todo:", error);
-//         }
-//       }
-//     }
-//   };
-// 
-//   return (
-//     <section className="max-w-3xl mx-auto py-16 px-6">
-//       <div className="flex gap-4 mb-8">
-//         <h1 className="flex-1 font-extrabold text-3xl">Your Todos:</h1>
-//         <Button className="px-6 py-3">
-//           <Link href="/AddTodo">Add Todo</Link>
-//         </Button>
-//       </div>
-// 
-//       {loading ? (
-//         <Loading />
-//       ) : (
-//         <div className="space-y-4">
-//           {todos.length > 0 ? (
-//             todos.map((todo) => (
-//               <Card key={todo._id} className="shadow-md">
-//                 <CardContent className="py-4 px-6 space-y-3">
-//                   <div className="flex items-center justify-between">
-//                     <h2 className="text-lg font-semibold">{todo.todoName}</h2>
-//                     <Checkbox
-//                       checked={todo.completed}
-//                       onCheckedChange={(checked) =>
-//                         handleCheckboxChange(todo._id, Boolean(checked))
-//                       }
-//                     />
-//                   </div>
-//                   <p className="text-sm text-muted-foreground">{todo.description}</p>
-// 
-//                   <div className="flex gap-2">
-//                     <Button variant="outline" className="w-full" onClick={() => handleEditClick(todo)}>
-//                       Edit
-//                     </Button>
-//                     <Button onClick={() => handleDelete(todo._id)} variant="destructive" className="w-full">
-//                       Delete
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))
-//           ) : (
-//             <p className="text-center text-muted-foreground">No tasks yet. Start by adding one!</p>
-//           )}
-//         </div>
-//       )}
-// 
-//       <AlertDialog open={open} onOpenChange={setOpen}>
-//         <AlertDialogContent>
-//           <AlertDialogHeader>
-//             <AlertDialogTitle>Edit Todo</AlertDialogTitle>
-//             <AlertDialogDescription>Edit the name and description of your todo.</AlertDialogDescription>
-//           </AlertDialogHeader>
-// 
-//           <div className="space-y-4">
-//             <input
-//               type="text"
-//               value={formData.todoName}
-//               onChange={(e) => setFormData({ ...formData, todoName: e.target.value })}
-//               className="w-full p-2 border rounded"
-//               placeholder="Todo Name"
-//             />
-//             <textarea
-//               value={formData.description}
-//               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-//               className="w-full p-2 border rounded"
-//               placeholder="Todo Description"
-//             />
-//           </div>
-// 
-//           <AlertDialogFooter>
-//             <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
-//             <AlertDialogAction onClick={handleSubmitEdit}>Save Changes</AlertDialogAction>
-//           </AlertDialogFooter>
-//         </AlertDialogContent>
-//       </AlertDialog>
-//     </section>
-//   );
-// }
-// 
-
 "use client";
 import Loading from "./Loading";
 import { useState, useEffect } from "react";
@@ -191,10 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import axios from "axios";
-import { useSession, getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import {
   AlertDialog,
-  AlertDialogTrigger,
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -205,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function TodoPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
@@ -214,21 +28,14 @@ export default function TodoPage() {
 
   useEffect(() => {
     async function getTodos() {
-      if (!session) return;
+      if (status !== "authenticated" || !session?.user?.email) return;
       try {
         setLoading(true);
-        const userSession = await getSession();
-        const response = await axios.post(
-          "/api/todos/fetch",
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${userSession?.jwt}`, // Secure authentication
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setTodos(response.data);
+        const response = await axios.post("/api/todos/fetch", {}, {
+          withCredentials: true, // Send session cookie automatically
+        });
+        // Handle both array and message response
+        setTodos(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Error fetching todos:", error);
       } finally {
@@ -236,11 +43,11 @@ export default function TodoPage() {
       }
     }
     getTodos();
-  }, [session]);
+  }, [session, status]);
 
   const handleCheckboxChange = async (todoId, completed) => {
     try {
-      await axios.post("/api/todos/edit/complete", { todoId, completed });
+      await axios.post("/api/todos/edit/complete", { todoId, completed }, { withCredentials: true });
       setTodos((prevTodos) =>
         prevTodos.map((todo) => (todo._id === todoId ? { ...todo, completed } : todo))
       );
@@ -251,7 +58,7 @@ export default function TodoPage() {
 
   const handleDelete = async (todoId) => {
     try {
-      await axios.post("/api/todos/delete", { todoId });
+      await axios.post("/api/todos/delete", { todoId }, { withCredentials: true });
       setTodos((prevTodos) => prevTodos.filter((todo) => todo._id !== todoId));
     } catch (error) {
       console.error("Error deleting todo:", error);
@@ -265,29 +72,29 @@ export default function TodoPage() {
   };
 
   const handleSubmitEdit = async () => {
-    if (formData.todoName.trim() && formData.description.trim()) {
-      if (editTodo) {
-        try {
-          await axios.post("/api/todos/edit/todo", {
-            todoId: editTodo._id,
-            todoName: formData.todoName,
-            description: formData.description,
-          });
-
-          setTodos((prevTodos) =>
-            prevTodos.map((todo) =>
-              todo._id === editTodo._id
-                ? { ...todo, todoName: formData.todoName, description: formData.description }
-                : todo
-            )
-          );
-          setOpen(false);
-        } catch (error) {
-          console.error("Error editing todo:", error);
-        }
+    if (formData.todoName.trim() && formData.description.trim() && editTodo) {
+      try {
+        await axios.post(
+          "/api/todos/edit/todo",
+          { todoId: editTodo._id, todoName: formData.todoName, description: formData.description },
+          { withCredentials: true }
+        );
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) =>
+            todo._id === editTodo._id
+              ? { ...todo, todoName: formData.todoName, description: formData.description }
+              : todo
+          )
+        );
+        setOpen(false);
+      } catch (error) {
+        console.error("Error editing todo:", error);
       }
     }
   };
+
+  if (status === "loading") return <Loading />;
+  if (status === "unauthenticated") return <p>Please sign in to view your todos.</p>;
 
   return (
     <section className="max-w-3xl mx-auto py-16 px-6">
@@ -310,13 +117,10 @@ export default function TodoPage() {
                     <h2 className="text-lg font-semibold">{todo.todoName}</h2>
                     <Checkbox
                       checked={todo.completed}
-                      onCheckedChange={(checked) =>
-                        handleCheckboxChange(todo._id, Boolean(checked))
-                      }
+                      onCheckedChange={(checked) => handleCheckboxChange(todo._id, Boolean(checked))}
                     />
                   </div>
                   <p className="text-sm text-muted-foreground">{todo.description}</p>
-
                   <div className="flex gap-2">
                     <Button variant="outline" className="w-full" onClick={() => handleEditClick(todo)}>
                       Edit
@@ -340,7 +144,6 @@ export default function TodoPage() {
             <AlertDialogTitle>Edit Todo</AlertDialogTitle>
             <AlertDialogDescription>Edit the name and description of your todo.</AlertDialogDescription>
           </AlertDialogHeader>
-
           <div className="space-y-4">
             <input
               type="text"
@@ -356,7 +159,6 @@ export default function TodoPage() {
               placeholder="Todo Description"
             />
           </div>
-
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setOpen(false)}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleSubmitEdit}>Save Changes</AlertDialogAction>
